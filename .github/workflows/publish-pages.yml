@@ -75,7 +75,7 @@ jobs:
           async function api(resource, missing = false) {
             const response = await fetch(`https://api.github.com/repos/${repository}${resource}`, { headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, redirect: 'error', cache: 'no-store', signal: AbortSignal.timeout(30000) });
             if (missing && response.status === 404) return null;
-            check(response.ok && !response.redirected); return response.json();
+            check(response.ok && !response.redirected); const value = await response.json(); check(value !== null); return value;
           }
           async function walk(directory, found) {
             for (const name of await fs.readdir(directory)) {
@@ -125,7 +125,8 @@ jobs:
             }
             check(executions.length === total && executions.some(run => run.id === Number(env.GITHUB_RUN_ID)));
             const firstExecution = env.GITHUB_RUN_ATTEMPT === '1' && executions.length === 1 && executions[0].id === Number(env.GITHUB_RUN_ID) && executions[0].run_attempt === 1;
-            await fs.appendFile(env.GITHUB_OUTPUT, `deploy=${firstExecution && deployment === null ? 'true' : 'false'}\n`);
+            const absent = deployment === null || exact(deployment, ['status']) && deployment.status === '';
+            await fs.appendFile(env.GITHUB_OUTPUT, `deploy=${firstExecution && absent ? 'true' : 'false'}\n`);
           })().catch(() => { console.error('PAGES_GATE_FAILED'); process.exitCode = 1; });
           // END SC2BS PAGES GATE
           NODE
