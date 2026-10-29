@@ -100,7 +100,7 @@ jobs:
             check(manifestBytes.toString('utf8') === canonical(manifest) && Array.isArray(manifest.files) && manifest.files.length > 0 && manifest.files.length <= 512);
             const expected = ['README.md', workflowPath, '.sc2bs-release.json', 'site/release-manifest.json']; let previous = '', totalBytes = 0;
             for (const file of manifest.files) {
-              check(exact(file, ['path', 'byteLength', 'sha256', 'kind']) && typeof file.path === 'string' && file.path > previous && file.path.length <= 240 && /^(?:catalog\.json|index\.html|assets\/[\w.-]+\.(?:js|css|png)|modules\/[a-z0-9-]+\/(?:daily|master)\.json)$/.test(file.path));
+              check(exact(file, ['path', 'byteLength', 'sha256', 'kind']) && typeof file.path === 'string' && file.path > previous && file.path.length <= 240 && /^(?:catalog\.json|index\.html|assets\/[\w.-]+\.(?:js|css|png)|modules\/[a-z0-9-]+\/(?:daily|guest|master)\.json)$/.test(file.path));
               check(Number.isSafeInteger(file.byteLength) && file.byteLength > 0 && file.byteLength <= 16777216 && sha256(file.sha256));
               check(file.kind === (file.path === 'catalog.json' ? 'catalog' : file.path.startsWith('modules/') ? 'encrypted' : 'public'));
               const content = await fs.readFile(`site/${file.path}`); check(content.length === file.byteLength && hash(content) === file.sha256);
